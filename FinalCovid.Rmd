@@ -1,0 +1,722 @@
+---
+title: "Covid"
+author: "Huong Giang Ho, Ehren DIetrick, Aminata Bangura"
+date: "2025-11-19"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(repos = c(CRAN = "https://cloud.r-project.org"))
+```
+
+```{r}
+# load the package for topic modeling
+install.packages("topicmodels")
+install.packages("dplyr")
+library(tm)
+library(topicmodels)
+library(dplyr)
+
+library(tidytext)
+library(tidyverse)
+
+library(tidyr)
+library(stringr)
+library(gutenbergr)
+library(ggplot2)
+library(wordcloud)
+library(igraph)
+```
+
+```{r}
+covid <- read_csv('~/Downloads/covid(covid1).csv') %>%
+  rename(ID = 1, date = 2, tweet = 3)
+##EDA basics for the base csv
+head(covid)
+dim(covid)
+summary(covid)
+```
+
+```{r}
+custom_stop_words <- c(stopwords("english"), 
+                       "covid", "vaccine", "vaccines", "covidvaccine", 
+                       "vaccination", "coronavirus")
+```
+
+```{r}
+corpus1 <- Corpus(VectorSource(covid$tweet))
+```
+
+```{r}
+install.packages("stopwords")
+library(stopwords)
+english_stopwords <- stopwords("en")
+
+#clean corpus
+corpus1 <- corpus1 %>%
+  tm_map(content_transformer(tolower)) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removeWords, custom_stop_words)  %>%
+  tm_map(removeWords, stopwords("en")) %>%
+  tm_map(stripWhitespace)
+  
+dtm1 <- DocumentTermMatrix(corpus1)
+dtm1 <- removeSparseTerms(dtm1, 0.995)  # reduce words appear fewer than .5% doc
+dtm1 <- dtm1[rowSums(as.matrix(dtm1)) > 0, ]  # remove empty docs
+```
+
+```{r}
+for (i in 2:10)
+{
+# apply LDA() and get beta scores
+lda1 <- LDA(dtm1, k = i, control = list(seed = 1234))
+
+# generate the per topic per word probabilities (beta)
+topics1 <- tidy(lda1, matrix = "beta")
+topics1
+
+# View top terms
+top_terms1 <- topics1 %>%
+  group_by(topic) %>%
+  top_n(20, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+print(top_terms1, n = 50)
+
+# PERPLEXITY (Lower is better)
+perplexity_score <- perplexity(lda1, dtm1)
+cat("Perplexity:", perplexity_score, "\n")
+}
+
+```
+
+```{r}
+#conclude: k=5 has the most menaingful topic
+```
+
+```{r}
+#covid2
+covid2 <- read_csv('~/Downloads/covid(covid2).csv') %>%
+  rename(ID = 1, date = 2, tweet = 3)
+##EDA basics for the base csv
+head(covid2)
+dim(covid2)
+summary(covid2)
+corpus2 <- Corpus(VectorSource(covid2$tweet))
+#clean corpus
+corpus2 <- corpus2 %>%
+  tm_map(content_transformer(tolower)) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removeWords, custom_stop_words)  %>%
+  tm_map(removeWords, stopwords("en")) %>%
+  tm_map(stripWhitespace)
+  
+dtm2 <- DocumentTermMatrix(corpus2)
+dtm2 <- removeSparseTerms(dtm2, 0.995)  # reduce words appear fewer than .5% doc
+dtm2 <- dtm2[rowSums(as.matrix(dtm2)) > 0, ]  # remove empty docs
+for (i in 2:10)
+{
+# apply LDA() and get beta scores
+lda2 <- LDA(dtm2, k = i, control = list(seed = 1234))
+
+# generate the per topic per word probabilities (beta)
+topics2 <- tidy(lda2, matrix = "beta")
+topics2
+
+# View top terms
+top_terms2 <- topics2 %>%
+  group_by(topic) %>%
+  top_n(20, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+print(top_terms2, n = 50)
+
+# PERPLEXITY (Lower is better)
+perplexity_score <- perplexity(lda2, dtm2)
+cat("Perplexity:", perplexity_score, "\n")
+}
+## choose k = 5
+```
+
+```{r}
+#covid3
+covid3 <- read_csv('~/Downloads/covid(covid3).csv') %>%
+  rename(ID = 1, date = 2, tweet = 3)
+##EDA basics for the base csv
+head(covid3)
+dim(covid3)
+summary(covid3)
+corpus3 <- Corpus(VectorSource(covid3$tweet))
+#clean corpus
+corpus3 <- corpus3 %>%
+  tm_map(content_transformer(tolower)) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removeWords, custom_stop_words)  %>%
+  tm_map(removeWords, stopwords("en")) %>%
+  tm_map(stripWhitespace)
+  
+dtm3 <- DocumentTermMatrix(corpus3)
+dtm3 <- removeSparseTerms(dtm3, 0.995)  # reduce words appear fewer than .5% doc
+dtm3 <- dtm3[rowSums(as.matrix(dtm3)) > 0, ]  # remove empty docs
+for (i in 2:10)
+{
+# apply LDA() and get beta scores
+lda3 <- LDA(dtm3, k = i, control = list(seed = 1234))
+
+# generate the per topic per word probabilities (beta)
+topics3 <- tidy(lda3, matrix = "beta")
+topics3
+
+# View top terms
+top_terms3 <- topics3 %>%
+  group_by(topic) %>%
+  top_n(20, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+print(top_terms3, n = 50)
+
+# PERPLEXITY (Lower is better)
+perplexity_score <- perplexity(lda3, dtm3)
+cat("Perplexity:", perplexity_score, "\n")
+}
+## choose k = 4
+```
+
+```{r}
+covid4 <- read_csv('~/Downloads/covid(covid4).csv') %>%
+  rename(ID = 1, date = 2, tweet = 3)
+##EDA basics for the base csv
+head(covid4)
+dim(covid4)
+summary(covid4)
+corpus4 <- Corpus(VectorSource(covid4$tweet))
+#clean corpus
+corpus4 <- corpus4 %>%
+  tm_map(content_transformer(tolower)) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removeWords, custom_stop_words)  %>%
+  tm_map(removeWords, stopwords("en")) %>%
+  tm_map(stripWhitespace)
+  
+dtm4 <- DocumentTermMatrix(corpus4)
+dtm4 <- removeSparseTerms(dtm4, 0.995)  # reduce words appear fewer than .5% doc
+dtm4 <- dtm4[rowSums(as.matrix(dtm4)) > 0, ]  # remove empty docs
+for (i in 2:10)
+{
+# apply LDA() and get beta scores
+lda4 <- LDA(dtm4, k = i, control = list(seed = 1234))
+
+# generate the per topic per word probabilities (beta)
+topics4 <- tidy(lda4, matrix = "beta")
+topics4
+
+# View top terms
+top_terms4 <- topics4 %>%
+  group_by(topic) %>%
+  top_n(20, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+print(top_terms4, n = 50)
+
+# PERPLEXITY (Lower is better)
+perplexity_score <- perplexity(lda4, dtm4)
+cat("Perplexity:", perplexity_score, "\n")
+}
+##choose k = 5
+```
+
+```{r}
+covid5 <- read_csv('~/Downloads/covid(covid5).csv') %>%
+  rename(ID = 1, date = 2, tweet = 3)
+##EDA basics for the base csv
+head(covid5)
+dim(covid5)
+summary(covid5)
+corpus5 <- Corpus(VectorSource(covid5$tweet))
+#clean corpus
+corpus5 <- corpus5 %>%
+  tm_map(content_transformer(tolower)) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removeWords, custom_stop_words)  %>%
+  tm_map(removeWords, stopwords("en")) %>%
+  tm_map(stripWhitespace)
+  
+dtm5 <- DocumentTermMatrix(corpus5)
+dtm5 <- removeSparseTerms(dtm5, 0.995)  # reduce words appear fewer than .5% doc
+dtm5 <- dtm5[rowSums(as.matrix(dtm5)) > 0, ]  # remove empty docs
+for (i in 2:10)
+{
+# apply LDA() and get beta scores
+lda5 <- LDA(dtm5, k = i, control = list(seed = 1234))
+
+# generate the per topic per word probabilities (beta)
+topics5 <- tidy(lda5, matrix = "beta")
+topics5
+
+# View top terms
+top_terms5 <- topics5 %>%
+  group_by(topic) %>%
+  top_n(20, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+print(top_terms5, n = 50)
+
+# PERPLEXITY (Lower is better)
+perplexity_score <- perplexity(lda5, dtm5)
+cat("Perplexity:", perplexity_score, "\n")
+}
+##choose k = 5
+```
+```{r}
+covid6 <- read_csv('~/Downloads/covid(covid6).csv') %>%
+  rename(ID = 1, date = 2, tweet = 3)
+##EDA basics for the base csv
+head(covid6)
+dim(covid6)
+summary(covid6)
+corpus6 <- Corpus(VectorSource(covid6$tweet))
+#clean corpus
+corpus6 <- corpus6 %>%
+  tm_map(content_transformer(tolower)) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removeWords, custom_stop_words)  %>%
+  tm_map(removeWords, stopwords("en")) %>%
+  tm_map(stripWhitespace)
+  
+dtm6 <- DocumentTermMatrix(corpus6)
+dtm6 <- removeSparseTerms(dtm6, 0.995)  # reduce words appear fewer than .5% doc
+dtm6 <- dtm6[rowSums(as.matrix(dtm6)) > 0, ]  # remove empty docs
+for (i in 2:10)
+{
+# apply LDA() and get beta scores
+lda6 <- LDA(dtm6, k = i, control = list(seed = 1234))
+
+# generate the per topic per word probabilities (beta)
+topics6 <- tidy(lda6, matrix = "beta")
+topics6
+
+# View top terms
+top_terms6 <- topics6 %>%
+  group_by(topic) %>%
+  top_n(20, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+print(top_terms6, n = 50)
+
+# PERPLEXITY (Lower is better)
+perplexity_score <- perplexity(lda6, dtm6)
+cat("Perplexity:", perplexity_score, "\n")
+}
+
+##choose k = 3
+```
+
+```{r}
+#choose k=5 for covid1
+lda1 <- LDA(dtm1, k = 5, control = list(seed = 1234))
+# generate the per topic per word probabilities (beta)
+topics1 <- tidy(lda1, matrix = "beta")
+topics1
+
+# View top terms
+top_terms1 <- topics1 %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+print(top_terms1, n = 50)
+
+# View top terms
+top_terms1 <- topics1 %>%
+  group_by(topic) %>%
+  top_n(20, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+print(top_terms1, n = 50)
+ggplot(top_terms1, aes(x = reorder(term, beta), y = beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  theme_minimal(base_size = 14) +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(
+    title = "Top Terms per Topic",
+    subtitle = "sep 20 - oct 22",
+    x = "term",
+  )
+```
+```{r}
+#choose k=5 for covid2
+lda2 <- LDA(dtm2, k = 5, control = list(seed = 1234))
+# generate the per topic per word probabilities (beta)
+topics2 <- tidy(lda2, matrix = "beta")
+topics2
+
+# View top terms
+top_terms2 <- topics2 %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+print(top_terms2, n = 50)
+
+ggplot(top_terms2, aes(x = reorder(term, beta), y = beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  theme_minimal(base_size = 14) +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(
+    title = "Top Terms per Topic",
+    subtitle = "july 12 - sep 19",
+    x = "term",
+  )
+```
+```{r}
+#choose k=4 for covid3
+lda3 <- LDA(dtm3, k = 4, control = list(seed = 1234))
+# generate the per topic per word probabilities (beta)
+topics3 <- tidy(lda3, matrix = "beta")
+topics3
+
+# View top terms
+top_terms3 <- topics3 %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+print(top_terms3, n = 50)
+ggplot(top_terms3, aes(x = reorder(term, beta), y = beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  theme_minimal(base_size = 14) +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(
+    title = "Top Terms per Topic",
+    subtitle = "june 7 - july 11",
+    x = "term",
+  )
+```
+```{r}
+#choose k=5 for covid4
+lda4 <- LDA(dtm4, k = 5, control = list(seed = 1234))
+# generate the per topic per word probabilities (beta)
+topics4 <- tidy(lda4, matrix = "beta")
+topics4
+
+# View top terms
+top_terms4 <- topics4 %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+print(top_terms4, n = 50)
+ggplot(top_terms4, aes(x = reorder(term, beta), y = beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  theme_minimal(base_size = 14) +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(
+    title = "Top Terms per Topic",
+    subtitle = "april 26 - june 6",
+    x = "term",
+  )
+```
+```{r}
+#choose k=5 for covid5
+lda5 <- LDA(dtm5, k = 5, control = list(seed = 1234))
+# generate the per topic per word probabilities (beta)
+topics5 <- tidy(lda5, matrix = "beta")
+topics5
+
+# View top terms
+top_terms5 <- topics5 %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+print(top_terms5, n = 50)
+ggplot(top_terms5, aes(x = reorder(term, beta), y = beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  theme_minimal(base_size = 14) +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(
+    title = "Top Terms per Topic",
+    subtitle = "march 15 - april 25",
+    x = "term",
+  )
+```
+```{r}
+#choose k=3 for covid6
+lda6 <- LDA(dtm6, k = 5, control = list(seed = 1234))
+# generate the per topic per word probabilities (beta)
+topics6 <- tidy(lda6, matrix = "beta")
+topics6
+
+# View top terms
+top_terms6 <- topics6 %>%
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+print(top_terms6, n = 50)
+ggplot(top_terms6, aes(x = reorder(term, beta), y = beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  coord_flip() +
+  theme_minimal(base_size = 14) +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(
+    title = "Top Terms per Topic",
+    subtitle = "feb 12 - march 14",
+    x = "term",
+  )
+```
+```{r}
+install.packages("tidytext")
+install.packages("textdata")
+library(tidytext)
+library(textdata)  # sentiment datasets
+sentiments
+get_sentiments("afinn")
+get_sentiments("bing")
+get_sentiments("nrc")
+library(dplyr)
+library(stringr)
+library(tidyr)
+library(tidyr)
+
+sentiment_stop_words <- c(stopwords("english"),
+                       "trump", "like", "virus") 
+```
+
+```{r}
+covid1_sentiment <- covid %>%  
+  unnest_tokens(word, tweet) %>%
+  anti_join(data.frame(word = sentiment_stop_words), by = "word") %>%
+  inner_join(get_sentiments("bing"), by = "word") %>%
+  count(sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(
+    sentiment = positive - negative,
+    total_words = positive + negative,
+    sentiment_ratio = positive / negative)
+head(covid1_sentiment)
+```
+
+```{r}
+covid2_sentiment <- covid2 %>%  
+  unnest_tokens(word, tweet) %>%
+  anti_join(data.frame(word = sentiment_stop_words), by = "word") %>%
+  inner_join(get_sentiments("bing"), by = "word") %>%
+  count(sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(
+    sentiment = positive - negative,
+    total_words = positive + negative,
+    sentiment_ratio = positive / negative)
+head(covid2_sentiment)
+```
+```{r}
+covid3_sentiment <- covid3 %>%  
+  unnest_tokens(word, tweet) %>%
+  anti_join(data.frame(word = sentiment_stop_words), by = "word") %>%
+  inner_join(get_sentiments("bing"), by = "word") %>%
+  count(sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(
+    sentiment = positive - negative,
+    total_words = positive + negative,
+    sentiment_ratio = positive / negative)
+head(covid3_sentiment)
+```
+```{r}
+covid4_sentiment <- covid4 %>%  
+  unnest_tokens(word, tweet) %>%
+  anti_join(data.frame(word = sentiment_stop_words), by = "word") %>%
+  inner_join(get_sentiments("bing"), by = "word") %>%
+  count(sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(
+    sentiment = positive - negative,
+    total_words = positive + negative,
+    sentiment_ratio = positive / negative)
+head(covid4_sentiment)
+```
+```{r}
+covid5_sentiment <- covid5 %>%  
+  unnest_tokens(word, tweet) %>%
+  anti_join(data.frame(word = sentiment_stop_words), by = "word") %>%
+  inner_join(get_sentiments("bing"), by = "word") %>%
+  count(sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(
+    sentiment = positive - negative,
+    total_words = positive + negative,
+    sentiment_ratio = positive / negative)
+head(covid5_sentiment)
+```
+```{r}
+covid6_sentiment <- covid6 %>%  
+  unnest_tokens(word, tweet) %>%
+  anti_join(data.frame(word = sentiment_stop_words), by = "word") %>%
+  inner_join(get_sentiments("bing"), by = "word") %>%
+  count(sentiment) %>%
+  spread(sentiment, n, fill = 0) %>%
+  mutate(
+    sentiment = positive - negative,
+    total_words = positive + negative,
+    sentiment_ratio = positive / negative)
+covid6_sentiment
+```
+```{r}
+create_sentiment_wordclouds <- function(data, dataset_name, sentiment_stop_words) {
+  # Tokenize and get sentiment words
+  sentiment_words <- data %>%
+    unnest_tokens(word, tweet) %>%
+    anti_join(data.frame(word = sentiment_stop_words), by = "word") %>%
+    inner_join(get_sentiments("bing"), by = "word") %>%
+    filter(str_length(word) > 1) %>%
+    count(word, sentiment, sort = TRUE)
+# Separate Positive Words
+  positive_words <- sentiment_words %>%
+filter(sentiment == "positive")
+# Separate Negative Words
+ negative_words <- sentiment_words %>%
+   filter(sentiment == "negative")
+
+  # Set margin space (mar = c(bottom, left, top, right))
+  # This provides space for the title on top
+  par(mar = c(0, 0, 4, 0)) 
+  
+# --- Positive Wordcloud ---
+  plot.new() # Start a new plot device for the wordcloud
+wordcloud(
+words = positive_words$word,
+ freq = positive_words$n,
+ min.freq = 5, # Adjust minimum frequency as needed
+ max.words = 100, # Max words to display
+ random.order = FALSE,
+ colors = brewer.pal(8, "Dark2")
+ )
+  # Add the title directly to the plot
+  title(paste("Positive Wordcloud", dataset_name), line = 2)
+
+ # --- Negative Wordcloud ---
+  plot.new() # Start a new plot device for the wordcloud
+ wordcloud(
+ words = negative_words$word,
+ freq = negative_words$n,
+ min.freq = 5, # Adjust minimum frequency as needed
+ max.words = 100, # Max words to display
+ random.order = FALSE,
+ colors = brewer.pal(8, "Dark2")
+ )
+  # Add the title directly to the plot
+  title(paste("Negative Wordcloud", dataset_name), line = 2)
+  
+  # Reset margins to default after plotting (important!)
+  par(mar = c(5.1, 4.1, 4.1, 2.1))
+}
+```
+```{r}
+# Ensure the wordcloud package is loaded
+library(wordcloud)
+library(RColorBrewer) # For colors in wordclouds
+
+
+
+# COVID 1
+create_sentiment_wordclouds(covid, "(sep 20 - oct 22)", sentiment_stop_words)
+
+# COVID 2
+create_sentiment_wordclouds(covid2, "(july 12 - sep 19)", sentiment_stop_words)
+
+# COVID 3
+create_sentiment_wordclouds(covid3, "(june 7 - july 11)", sentiment_stop_words)
+
+# COVID 4
+create_sentiment_wordclouds(covid4, "(april 26 - june 6)", sentiment_stop_words)
+
+# COVID 5
+create_sentiment_wordclouds(covid5, "(march 15 - april 25)", sentiment_stop_words)
+
+# COVID 6
+create_sentiment_wordclouds(covid6, "(feb 12 - march 14)", sentiment_stop_words)
+```
+```{r}
+library(dplyr)
+library(tidytext)
+library(tidyr)
+library(knitr)
+
+# Ensure the custom stop words list is defined in the environment
+sentiment_stop_words <- c(stopwords("english"),
+  "trump", "like", "virus")
+
+extract_top_words <- function(data, name) {
+  # Perform tokenization and sentiment joining
+  sentiment_words_counts <- data %>%
+    unnest_tokens(word, tweet) %>%
+     # Remove custom stop words
+     anti_join(data.frame(word = sentiment_stop_words), by = "word") %>%
+     # Join with bing sentiment lexicon
+     inner_join(get_sentiments("bing"), by = "word") %>%
+     filter(str_length(word) > 1) %>%
+     count(word, sentiment, sort = TRUE) %>%
+     mutate(Dataset = name)
+   return(sentiment_words_counts)
+}
+```
+
+```{r}
+all_word_counts <- bind_rows(
+extract_top_words(covid, "(Sep 20 - Oct 22)"),
+ extract_top_words(covid2, "(July 12 - Sep 19)"), # Adjusted name for consistency
+ extract_top_words(covid3, "(Jun 7 - Jul 11)"),
+ extract_top_words(covid4, "(Apr 26 - Jun 6)"),
+ extract_top_words(covid5, "(Mar 15 - Apr 25)"),
+ extract_top_words(covid6, "(Feb 12 - Mar 14)")
+)
+
+# Calculate top 5 words per dataset
+top_5_words_per_dataset <- all_word_counts %>%
+ group_by(Dataset, sentiment) %>%
+ slice_max(order_by = n, n = 5, with_ties = FALSE)
+
+# 1. Define the order of date ranges for printing 
+print_order <- c(
+ "(Feb 12 - Mar 14)",
+ "(Mar 15 - Apr 25)",
+ "(Apr 26 - Jun 6)",
+ "(Jun 7 - Jul 11)",
+ "(July 12 - Sep 19)", 
+ "(Sep 20 - Oct 22)"
+)
+
+# 2. Loop through the desired order and print each dataset's top words
+for (dataset_name in print_order) {
+  # Filter the consolidated table for the current dataset
+  dataset_table <- top_5_words_per_dataset %>%
+    filter(Dataset == dataset_name) %>%
+    # Sort by sentiment (negative/positive) and then by count (n)
+    arrange(sentiment, desc(n))
+  
+  # Print the heading
+  cat("\n\n### Top 5 Sentiment Words for Dataset:", dataset_name, "\n")
+  
+  # Display the table using kable for clear R Markdown output
+  cat(knitr::kable(dataset_table, format = "markdown"), "\n\n")
+}
+```
