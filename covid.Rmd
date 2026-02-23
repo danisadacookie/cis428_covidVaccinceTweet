@@ -1,0 +1,52 @@
+---
+title: "D2"
+author: "Ehren Dietrick, Huong Giang Ho, Aminata Bangura"
+date: "2025-10-28"
+output: word_document
+---
+
+```{r}
+library(tm)
+library(dplyr)
+library(tidytext)
+library(tidyverse)
+library(tidyr)
+library(stringr)
+library(gutenbergr)
+library(ggplot2)
+library(wordcloud)
+library(igraph)
+
+covid <- read_csv('~/Downloads/covid.csv')
+```
+```{r}
+##EDA basics for the base csv
+head(covid)
+structure(covid)
+dim(covid)
+summary(covid)
+```
+```{r}
+## make the tweet text into a corpus, for word cloud and viewing
+covid_text <- paste(covid$tweet, collapse = " ")
+corpus <- Corpus(VectorSource(covid_text))
+```
+```{r}
+## clean corpus
+corpus <- corpus %>%
+  tm_map(content_transformer(tolower)) %>%
+  tm_map(removePunctuation) %>%
+  tm_map(removeNumbers) %>%
+  tm_map(removeWords, stopwords("english")) %>%
+  tm_map(stripWhitespace)
+```
+```{r}
+##Document term matrix for examining frequency
+tdm <- TermDocumentMatrix(corpus)
+tdm_matrix <- as.matrix(tdm)
+word_freq <- sort(rowSums(tdm_matrix), decreasing = TRUE)
+head(word_freq)
+
+wordcloud(names(word_freq), word_freq, max.words = 100, colors = brewer.pal(8, "Dark2"))
+```
+
